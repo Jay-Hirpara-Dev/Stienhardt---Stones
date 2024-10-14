@@ -1,0 +1,146 @@
+<section>
+  {% schema %}
+    {
+      "name": "Diamond Carousel",
+      "settings": [],
+      "presets": [{
+        "name": "Default",
+        "category": "Custom"
+      }]
+    }
+  {% endschema %}
+  
+  <div class="diamond-carousel">
+    <div class="diamond-shapes">
+      {% assign diamond_shapes = "Asscher,Cushion,Emerald,Heart,Marquise,Oval,Pear,Princess,Round" | split: ',' %}
+      {% for shape in diamond_shapes %}
+      <div class="diamond-shape" data-shape="{{ shape }}" data-index="{{ forloop.index0 }}">
+        <img src="{{ 'diamond-' | append: shape | downcase | append: '.png' | asset_url }}" alt="{{ shape }} Diamond">
+        <span class="diamond-name">{{ shape }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="diamond-description">
+      <button class="arrow prev">&larr;</button>
+      <p id="diamond-description-text">Select a diamond shape to see details.</p>
+      <button class="arrow next">&rarr;</button>
+    </div>
+  </div>
+  
+  <style>
+    .diamond-carousel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 50px;
+    }
+
+    .diamond-shapes {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      transition: transform 0.5s ease;
+      position: relative;
+    }
+
+    .diamond-shape {
+      cursor: pointer;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0.7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .diamond-shape img {
+      max-width: 80px;
+      transition: transform 0.3s ease;
+    }
+
+    .diamond-shape.active {
+      transform: scale(1.5);
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .diamond-description {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 300px;
+    }
+
+    .arrow {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const diamondShapes = document.querySelectorAll('.diamond-shape');
+      const descriptionText = document.getElementById('diamond-description-text');
+      const diamondDescriptions = {
+        'Asscher': 'Asscher cut diamonds are known for their step cuts and unique brilliance.',
+        'Cushion': 'Cushion cut diamonds are soft, rounded, and provide a classic look.',
+        'Emerald': 'Emerald cut diamonds have a rectangular shape with step cuts.',
+        'Heart': 'Heart-shaped diamonds are a symbol of love and romance.',
+        'Marquise': 'Marquise diamonds have a long and narrow shape, giving a sophisticated look.',
+        'Oval': 'Oval diamonds offer an elongated look, enhancing the finger length.',
+        'Pear': 'Pear diamonds combine the brilliance of a round and the elegance of a marquise.',
+        'Princess': 'Princess cut diamonds are square-shaped and very modern.',
+        'Round': 'Round diamonds are classic, timeless, and offer maximum brilliance.'
+      };
+
+      let centerIndex = 0; // Initially the center diamond is the first diamond (Asscher)
+
+      function updateCarousel(selectedIndex) {
+        const diamondContainer = document.querySelector('.diamond-shapes');
+        const currentCenter = diamondShapes[centerIndex];
+        const selectedDiamond = diamondShapes[selectedIndex];
+
+        // Swap the positions in the DOM
+        if (selectedIndex !== centerIndex) {
+          diamondContainer.insertBefore(selectedDiamond, currentCenter);
+          diamondContainer.insertBefore(currentCenter, diamondShapes[selectedIndex + 1] || null);
+        }
+
+        // Update classes and description
+        diamondShapes.forEach((shape, index) => {
+          shape.classList.remove('active');
+          if (index === selectedIndex) {
+            shape.classList.add('active');
+            descriptionText.textContent = diamondDescriptions[shape.dataset.shape];
+          }
+        });
+
+        centerIndex = selectedIndex;
+      }
+
+      diamondShapes.forEach((shape, index) => {
+        shape.addEventListener('click', () => {
+          updateCarousel(index);
+        });
+      });
+
+      document.querySelector('.arrow.next').addEventListener('click', () => {
+        let nextIndex = (centerIndex + 1) % diamondShapes.length;
+        updateCarousel(nextIndex);
+      });
+
+      document.querySelector('.arrow.prev').addEventListener('click', () => {
+        let prevIndex = (centerIndex - 1 + diamondShapes.length) % diamondShapes.length;
+        updateCarousel(prevIndex);
+      });
+
+      // Initialize with the default center diamond
+      updateCarousel(centerIndex);
+    });
+  </script>
+</section>
